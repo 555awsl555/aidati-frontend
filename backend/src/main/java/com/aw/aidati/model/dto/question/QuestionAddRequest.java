@@ -20,17 +20,12 @@ public class QuestionAddRequest implements Serializable {
     /**
      * 题目内容（json格式）
      */
-    private QuestionContentDTO questioncontent;
+    private List<QuestionContentDTO> questionContent;
 
     /**
      * 应用 id
      */
-    private Long appid;
-
-    /**
-     * 创建用户 id
-     */
-    private Long userid;
+    private Long appId;
 
     private static final long serialVersionUID = 1L;
 }
