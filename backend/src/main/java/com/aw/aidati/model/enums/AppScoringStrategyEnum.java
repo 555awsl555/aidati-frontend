@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
  * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
-public enum AppScoringStrateEnum {
+public enum AppScoringStrategyEnum {
 
     CUSTOM("自定义",0),
     AI("AI",1);
@@ -21,7 +21,7 @@ public enum AppScoringStrateEnum {
 
     private final int value;
 
-    AppScoringStrateEnum(String text, int value) {
+    AppScoringStrategyEnum(String text, int value) {
         this.text = text;
         this.value = value;
     }
@@ -32,11 +32,11 @@ public enum AppScoringStrateEnum {
      * @param value
      * @return
      */
-    public static AppScoringStrateEnum getEnumByValue(Integer value) {
+    public static AppScoringStrategyEnum getEnumByValue(Integer value) {
         if (ObjectUtil.isEmpty(value)) {
             return null;
         }
-        for (AppScoringStrateEnum anEnum : AppScoringStrateEnum.values()) {
+        for (AppScoringStrategyEnum anEnum : AppScoringStrategyEnum.values()) {
             if (anEnum.value == value) {
                 return anEnum;
             }
