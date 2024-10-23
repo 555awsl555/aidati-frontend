@@ -16,13 +16,13 @@ import java.util.List;
 @SpringBootTest
 public class ZhiPuAiTest {
 
-//    @Resource
-//    private ClientV4 clientV4;
+    @Resource
+    private ClientV4 clientV4;
 
     @Test
     public void test() {
         // 初始化客户端
-        ClientV4 client = new ClientV4.Builder("2d01b9b9bad0ce667c901e57538d5a85.gBngS131qWT8uM5I").build();
+//        ClientV4 client = new ClientV4.Builder("2d01b9b9bad0ce667c901e57538d5a85.gBngS131qWT8uM5I").build();
         // 构建请求
         List<ChatMessage> messages = new ArrayList<>();
         ChatMessage chatMessage = new ChatMessage(ChatMessageRole.USER.value(), "作为一名营销专家，请为智谱开放平台创作一个吸引人的slogan");
@@ -34,7 +34,7 @@ public class ZhiPuAiTest {
                 .invokeMethod(Constants.invokeMethod)
                 .messages(messages)
                 .build();
-        ModelApiResponse invokeModelApiResp = client.invokeModelApi(chatCompletionRequest);
+        ModelApiResponse invokeModelApiResp = clientV4.invokeModelApi(chatCompletionRequest);
         System.out.println("model output:" + invokeModelApiResp.getData().getChoices().get(0));
     }
 }
