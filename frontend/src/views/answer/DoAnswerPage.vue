@@ -86,7 +86,7 @@ const questionOptions = computed(() => {
     ? currentQuestion.value.options.map((option) => {
         return {
           label: `${option.key}. ${option.value}`,
-          value: option.key,
+          value: option.key ?? "",
         };
       })
     : [];
@@ -122,7 +122,11 @@ const loadData = async () => {
     sortField: "createTime",
     sortOrder: "descend",
   });
-  if (res.data.code === 0 && res.data.data?.records) {
+  if (
+    res.data.code === 0 &&
+    res.data.data?.records &&
+    res.data.data.records[0] != undefined
+  ) {
     questionContent.value = res.data.data.records[0].questionContent;
   } else {
     message.error("获取题目失败，" + res.data.message);
@@ -144,7 +148,7 @@ watchEffect(() => {
  * 选中选项后，保存选项记录
  * @param value
  */
-const doRadioChange = (value: string) => {
+const doRadioChange = (value: any) => {
   answerList[current.value - 1] = value;
 };
 

@@ -163,6 +163,11 @@ public class UserController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        //用户不能删除自己
+        Long userId = userService.getLoginUser(request).getId();
+        if(deleteRequest.getId().equals(userId)){
+            return ResultUtils.error(ErrorCode.DELETE_ERROR);
+        }
         boolean b = userService.removeById(deleteRequest.getId());
         return ResultUtils.success(b);
     }
