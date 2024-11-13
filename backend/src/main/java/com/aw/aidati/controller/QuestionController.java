@@ -301,7 +301,7 @@ public class QuestionController {
 
     @PostMapping("/ai_generate")
     public BaseResponse<List<QuestionContentDTO>> aiGenerateQuestion(
-            @RequestBody AiGenerateQuestionRequest aiGenerateQuestionRequest) {
+            @RequestBody AiGenerateQuestionRequest aiGenerateQuestionRequest,HttpServletRequest request) {
         ThrowUtils.throwIf(aiGenerateQuestionRequest == null, ErrorCode.PARAMS_ERROR);
         // 获取参数
         Long appId = aiGenerateQuestionRequest.getAppId();
@@ -313,6 +313,7 @@ public class QuestionController {
         // 封装 Prompt
         String userMessage = getGenerateQuestionUserMessage(app, questionNumber, optionNumber);
         // AI 生成
+        //todo
         String result = aiManager.doSyncRequest(GENERATE_QUESTION_SYSTEM_MESSAGE, userMessage, null);
         // 截取需要的 JSON 信息
         int start = result.indexOf("[");
@@ -329,6 +330,7 @@ public class QuestionController {
         Long appId = aiGenerateQuestionRequest.getAppId();
         int questionNumber = aiGenerateQuestionRequest.getQuestionNumber();
         int optionNumber = aiGenerateQuestionRequest.getOptionNumber();
+//        System.err.println("@@@@@@@@@@@@@"+appId+","+questionNumber+","+optionNumber+","+userService.getLoginUser(request));
         // 获取应用信息
         App app = appService.getById(appId);
         ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
@@ -342,14 +344,10 @@ public class QuestionController {
         AtomicInteger counter = new AtomicInteger(0);
         // 拼接完整题目
         StringBuilder stringBuilder = new StringBuilder();
-
-        // 获取登录用户
-        User loginUser = userService.getLoginUser(request);
+        // 获取登录用户,让每一个登录用户都有实时生成的能力
+//        User loginUser = userService.getById(1);
         // 默认全局线程池
         Scheduler scheduler = Schedulers.io();
-        if ("vip".equals(loginUser.getUserRole())) {
-            scheduler = vipScheduler;
-        }
         modelDataFlowable
                 .observeOn(scheduler)
                 .map(modelData -> modelData.getChoices().get(0).getDelta().getContent())

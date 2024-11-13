@@ -88,12 +88,21 @@ public class AiManager {
      * @return
      */
     public String doRequest(List<ChatMessage> messages, Boolean stream, Float temperature) {
+        // 创建 tool 对象
+        List<ChatTool> tools = new ArrayList<>();
+        Retrieval retrieval = new Retrieval();
+//        String template = "从文档\\n\\\"\\\"\\\"\\n{{knowledge}}\\n\\\"\\\"\\\"\\n中找问题\\n\\\"\\\"\\\"\\n{{question}}\\n\\\"\\\"\\\"\\n的答案，找到答案就仅使用文档语句回答问题，找不到答案就用自身知识回答并且告诉用户该信息不是来自文档。\\n不要复述问题，直接开始回答。\"
+        retrieval.setKnowledge_id("1851463664805310464");
+//        retrieval.setPrompt_template();
+        ChatTool tool = new ChatTool("retrieval",null,retrieval,null);
+        tools.add(tool);
         // 构建请求
         ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest.builder()
                 .model(Constants.ModelChatGLM4)
                 .stream(stream)
                 .temperature(temperature)
                 .invokeMethod(Constants.invokeMethod)
+                .tools(tools)
                 .messages(messages)
                 .build();
         try {
