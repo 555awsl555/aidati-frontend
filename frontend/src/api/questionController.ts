@@ -17,6 +17,18 @@ export async function addQuestionUsingPost(
   });
 }
 
+/** 添加每道题目的分数 */
+export async function setQuestionScore(score: number) {
+  return request("/api/question/setScore?score=" + score, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+
+
 /** aiGenerateQuestion POST /api/question/ai_generate */
 export async function aiGenerateQuestionUsingPost(
   body: API.AiGenerateQuestionRequest,

@@ -23,7 +23,13 @@
     </a-col>
     <a-col flex="100px">
       <div v-if="loginUserStore.loginUser.id">
-        {{ loginUserStore.loginUser.userName ?? "无名" }}
+        <a-dropdown @select="handleSelect">
+          <a-button>{{ loginUserStore.loginUser.userName ?? "无名" }}</a-button>
+          <template #content>
+            <a-doption @click="logout">退出登录</a-doption>
+          </template>
+        </a-dropdown>
+
       </div>
       <div v-else>
         <a-button type="primary" href="/user/login">登录</a-button>
@@ -38,6 +44,9 @@ import { useRouter } from "vue-router";
 import { computed, ref } from "vue";
 import { useLoginUserStore } from "@/store/userStore";
 import checkAccess from "@/access/checkAccess";
+import {getAppAnswerCountUsingGet} from "@/api/appStatisticController";
+import message from "@arco-design/web-vue/es/message";
+import {userLogoutUsingPost} from "@/api/userController";
 
 const loginUserStore = useLoginUserStore();
 
@@ -68,6 +77,20 @@ const doMenuClick = (key: string) => {
   router.push({
     path: key,
   });
+};
+
+//退出登录
+const handleSelect = (v) => {
+  console.log(v)
+}
+const logout = async () => {
+  const res = await userLogoutUsingPost();
+  if (res.data.code === 0) {
+    message.success("退出登录成功！");
+  } else {
+    message.error("获取数据失败，" + res.data.message);
+  }
+  router.push("/user/login");
 };
 </script>
 

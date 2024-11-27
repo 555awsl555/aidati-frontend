@@ -8,7 +8,7 @@
         <router-view />
       </a-layout-content>
       <a-layout-footer class="footer">
-        <a href="" target="_blank"> by aw </a>
+        <a href="" target="_blank"> 创建新的界面 </a>
       </a-layout-footer>
     </a-layout>
   </div>

@@ -34,6 +34,14 @@
             placeholder="请输入选项数量"
           />
         </a-form-item>
+        <a-form-item field="score" label="每题分数">
+          <a-input-number
+              min="0"
+              max="6"
+              v-model="score"
+              placeholder="请输入每题分数"
+          />
+        </a-form-item>
         <a-form-item>
           <a-space>
             <a-button
@@ -61,8 +69,9 @@
 <script setup lang="ts">
 import { defineProps, reactive, ref, withDefaults } from "vue";
 import API from "@/api";
-import { aiGenerateQuestionUsingPost } from "@/api/questionController";
+import {aiGenerateQuestionUsingPost, setQuestionScore} from "@/api/questionController";
 import message from "@arco-design/web-vue/es/message";
+import {userLogoutUsingPost} from "@/api/userController";
 
 interface Props {
   appId: string;
@@ -82,6 +91,9 @@ const form = reactive({
   optionNumber: 2,
   questionNumber: 10,
 } as API.AiGenerateQuestionRequest);
+
+//每一题的分数设置
+const score = ref(10);
 
 const visible = ref(false);
 const submitting = ref(false);
@@ -103,6 +115,13 @@ const handleCancel = () => {
 const handleSubmit = async () => {
   if (!props.appId) {
     return;
+  }
+  //设置分数
+  const scoreResult = await setQuestionScore(score.value)
+  if (scoreResult.data.code === 0) {
+    console.log("设置分数成功！");
+  } else {
+    message.error("设置分数失败，" + scoreResult.data.message);
   }
   submitting.value = true;
   const res = await aiGenerateQuestionUsingPost({
@@ -129,6 +148,13 @@ const handleSubmit = async () => {
 const handleSSESubmit = async () => {
   if (!props.appId) {
     return;
+  }
+  //设置分数
+  const scoreResult = await setQuestionScore(score.value);
+  if (scoreResult.data.code === 0) {
+    console.log("设置分数成功！");
+  } else {
+    message.error("设置分数失败，" + scoreResult.data.message);
   }
   sseSubmitting.value = true;
   // 创建 SSE 请求
