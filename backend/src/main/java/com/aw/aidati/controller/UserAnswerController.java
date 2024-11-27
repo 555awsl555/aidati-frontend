@@ -86,6 +86,7 @@ public class UserAnswerController {
         // 返回新写入的数据 id
         long newUserAnswerId = userAnswer.getId();
         try {
+            System.out.println("选项为："+choices);
             UserAnswer userAnswerWithResult = scoringStrategyExecutor.doScore(choices, app);
             userAnswerWithResult.setId(newUserAnswerId);
             userAnswerService.updateById(userAnswerWithResult);

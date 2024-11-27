@@ -33,6 +33,7 @@ public class ScoringStrategyExecutor {
         }
         // 根据注解获取策略
         for (ScoringStrategy strategy : scoringStrategyList) {
+//            System.out.println("strategy:"+strategy);
             if (strategy.getClass().isAnnotationPresent(ScoringStrategyConfig.class)) {
                 ScoringStrategyConfig scoringStrategyConfig = strategy.getClass().getAnnotation(ScoringStrategyConfig.class);
                 if (scoringStrategyConfig.appType() == appType && scoringStrategyConfig.scoringStrategy() == appScoringStrategy) {

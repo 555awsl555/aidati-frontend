@@ -25,7 +25,9 @@ import com.zhipu.oapi.service.v4.model.ModelData;
 import io.reactivex.Flowable;
 import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -61,6 +63,23 @@ public class QuestionController {
     private Scheduler vipScheduler;
 
     // region 增删改查
+
+    //这是分数的默认值量，为全局变量
+    private static Integer QUESTION_SCORE = 10;
+
+    /**
+     * 设置题目的分数
+     * @param score 分数值
+     * @return QuestionScore 实际分数值
+     */
+    @PostMapping("/setScore")
+    public BaseResponse<Integer> setQuestionScore(@RequestParam Integer score){
+        QUESTION_SCORE = 10;
+        if (score!=null){
+            QUESTION_SCORE = score;
+        }
+        return ResultUtils.success(QUESTION_SCORE);
+    }
 
     /**
      * 创建题目
@@ -275,9 +294,9 @@ public class QuestionController {
             "1. 要求：题目和选项尽可能地短，题目不要包含序号，每题的选项数以我提供的为主，题目不能重复\n" +
             "2. 严格按照下面的 json 格式输出题目和选项\n" +
             "```\n" +
-            "[{\"options\":[{\"value\":\"选项内容\",\"key\":\"A\"},{\"value\":\"\",\"key\":\"B\"}],\"title\":\"题目标题\"}]\n" +
+            "[{\"options\":[{\"value\":\"选项内容\",\"key\":\"A\",\"score\":\"选项得分\",\"result\":\"选项结果\"},{\"value\":\"\",\"key\":\"B\",\"score\":\"选项得分\",\"result\":\"选项结果\"}],\"title\":\"题目标题\"}]\n" +
             "```\n" +
-            "title 是题目，options 是选项，每个选项的 key 按照英文字母序（比如 A、B、C、D）以此类推，value 是选项内容\n" +
+            "title 是题目，options 是选项，score是选项得分，是int类型，只有正确选项才有分数（不说明默认为10分），错误选项为0分，result为各个选项的结果，类如”正确“、”错误“，若为没有固定正确答案的测试选项就为其他的对应选项的测试结果，每个选项的 key 按照英文字母序（比如 A、B、C、D）以此类推，选项里内容不用包含A、B、C、D，value 是选项内容\n" +
             "3. 检查题目是否包含序号，若包含序号则去除序号\n" +
             "4. 返回的题目列表格式必须为 JSON 数组";
 
@@ -313,7 +332,6 @@ public class QuestionController {
         // 封装 Prompt
         String userMessage = getGenerateQuestionUserMessage(app, questionNumber, optionNumber);
         // AI 生成
-        //todo
         String result = aiManager.doSyncRequest(GENERATE_QUESTION_SYSTEM_MESSAGE, userMessage, null);
         // 截取需要的 JSON 信息
         int start = result.indexOf("[");
@@ -339,7 +357,7 @@ public class QuestionController {
         // 建立 SSE 连接对象，0 表示永不超时
         SseEmitter sseEmitter = new SseEmitter(0L);
         // AI 生成，SSE 流式返回
-        Flowable<ModelData> modelDataFlowable = aiManager.doStreamRequest(GENERATE_QUESTION_SYSTEM_MESSAGE, userMessage, null);
+        Flowable<ModelData> modelDataFlowable = aiManager.doStreamRequest(GENERATE_QUESTION_SYSTEM_MESSAGE+"\n每一题的分数为"+QUESTION_SCORE, userMessage, null);
         // 左括号计数器，除了默认值外，当回归为 0 时，表示左括号等于右括号，可以截取
         AtomicInteger counter = new AtomicInteger(0);
         // 拼接完整题目

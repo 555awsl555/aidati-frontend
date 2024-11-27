@@ -1,48 +1,67 @@
 <template>
-  <div id="doAnswerPage">
-    <a-card>
-      <h1>{{ app.appName }}</h1>
-      <p>{{ app.appDesc }}</p>
-      <h2 style="margin-bottom: 16px">
-        {{ current }}、{{ currentQuestion?.title }}
-      </h2>
-      <div>
-        <a-radio-group
-          direction="vertical"
-          v-model="currentAnswer"
-          :options="questionOptions"
-          @change="doRadioChange"
-        />
-      </div>
-      <div style="margin-top: 24px">
-        <a-space size="large">
-          <a-button
-            type="primary"
-            circle
-            v-if="current < questionContent.length"
-            :disabled="!currentAnswer"
-            @click="current += 1"
+  <div id="doAnswerPage" style="display: flex">
+    <!-- 主内容 -->
+    <div style="flex: 3; margin-right: 24px">
+      <a-card>
+        <h1>{{ app.appName }}</h1>
+        <p>{{ app.appDesc }}</p>
+        <h2 style="margin-bottom: 16px">
+          {{ current }}、{{ currentQuestion?.title }}
+        </h2>
+        <div>
+          <a-radio-group
+              direction="vertical"
+              v-model="currentAnswer"
+              :options="questionOptions"
+              @change="doRadioChange"
+          />
+        </div>
+        <div style="margin-top: 24px">
+          <a-space size="large">
+            <a-button
+                type="primary"
+                circle
+                v-if="current < questionContent.length"
+                @click="current += 1"
+            >
+              下一题
+            </a-button>
+            <a-button
+                type="primary"
+                v-if="current === questionContent.length"
+                :loading="submitting"
+                circle
+                :disabled="!currentAnswer"
+                @click="doSubmit"
+            >
+              {{ submitting ? "评分中" : "查看结果" }}
+            </a-button>
+            <a-button v-if="current > 1" circle @click="current -= 1">
+              上一题
+            </a-button>
+          </a-space>
+        </div>
+      </a-card>
+    </div>
+
+    <!-- 导航栏 -->
+    <div style="flex: 1">
+      <a-card title="题目导航">
+        <div class="navigation">
+          <button
+              v-for="(answered, index) in questionStatus"
+              :key="index"
+              :class="['nav-button', { answered }]"
+              @click="goToQuestion(index + 1)"
           >
-            下一题
-          </a-button>
-          <a-button
-            type="primary"
-            v-if="current === questionContent.length"
-            :loading="submitting"
-            circle
-            :disabled="!currentAnswer"
-            @click="doSubmit"
-          >
-            {{ submitting ? "评分中" : "查看结果" }}
-          </a-button>
-          <a-button v-if="current > 1" circle @click="current -= 1">
-            上一题
-          </a-button>
-        </a-space>
-      </div>
-    </a-card>
+            {{ index + 1 }}
+          </button>
+        </div>
+      </a-card>
+    </div>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import {
@@ -97,7 +116,6 @@ const currentAnswer = ref<string>();
 const answerList = reactive<string[]>([]);
 // 是否正在提交结果
 const submitting = ref(false);
-
 /**
  * 加载数据
  */
@@ -171,4 +189,40 @@ const doSubmit = async () => {
   }
   submitting.value = false;
 };
+
+// 动态生成题目状态（已答/未答）
+const questionStatus = computed(() =>
+    questionContent.value.map((_, index) => !!answerList[index])
+);
+
+// 跳转到指定题目
+const goToQuestion = (questionNumber: number) => {
+  current.value = questionNumber;
+};
+
 </script>
+
+<style>
+.navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px; /* 按钮之间的间距 */
+}
+
+.nav-button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  background-color: white;
+  color: black;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.nav-button.answered {
+  background-color: blue;
+  color: white;
+}
+
+</style>
