@@ -2,11 +2,11 @@
   <div id="addQuestionPage">
     <h2 style="margin-bottom: 32px">设置题目</h2>
     <a-form
-      :model="questionContent"
-      :style="{ width: '480px' }"
-      label-align="left"
-      auto-label-width
-      @submit="handleSubmit"
+        :model="questionContent"
+        :style="{ width: '480px' }"
+        label-align="left"
+        auto-label-width
+        @submit="handleSubmit"
     >
       <a-form-item label="应用 id">
         {{ appId }}
@@ -18,81 +18,89 @@
           </a-button>
           <!-- AI 生成抽屉 -->
           <AiGenerateQuestionDrawer
-            :appId="appId"
-            :onSuccess="onAiGenerateSuccess"
-            :onSSESuccess="onAiGenerateSuccessSSE"
-            :onSSEClose="onSSEClose"
-            :onSSEStart="onSSEStart"
+              :appId="appId"
+              :onSuccess="onAiGenerateSuccess"
+              :onSSESuccess="onAiGenerateSuccessSSE"
+              :onSSEClose="onSSEClose"
+              :onSSEStart="onSSEStart"
           />
         </a-space>
-        <!-- 遍历每道题目 -->
-        <div v-for="(question, index) in questionContent" :key="index">
-          <a-space size="large">
-            <h3>题目 {{ index + 1 }}</h3>
-            <a-button size="small" @click="addQuestion(index + 1)">
-              添加题目
-            </a-button>
-            <a-button
-              size="small"
-              status="danger"
-              @click="deleteQuestion(index)"
-            >
-              删除题目
-            </a-button>
-          </a-space>
-          <a-form-item field="posts.post1" :label="`题目 ${index + 1} 标题`">
-            <a-input v-model="question.title" placeholder="请输入标题" />
-          </a-form-item>
-          <!--  题目选项 -->
-          <a-space size="large">
-            <h4>题目 {{ index + 1 }} 选项列表</h4>
-            <a-button
-              size="small"
-              @click="addQuestionOption(question, question.options.length)"
-            >
-              底部添加选项
-            </a-button>
-          </a-space>
-          <a-form-item
-            v-for="(option, optionIndex) in question.options"
-            :key="optionIndex"
-            :label="`选项 ${optionIndex + 1}`"
-            :content-flex="false"
-            :merge-props="false"
-          >
-            <a-form-item label="选项 key">
-              <a-input v-model="option.key" placeholder="请输入选项 key" />
-            </a-form-item>
-            <a-form-item label="选项值">
-              <a-input v-model="option.value" placeholder="请输入选项值" />
-            </a-form-item>
-            <a-form-item label="选项结果">
-              <a-input v-model="option.result" placeholder="请输入选项结果" />
-            </a-form-item>
-            <a-form-item label="选项得分">
-              <a-input-number
-                v-model="option.score"
-                placeholder="请输入选项得分"
-              />
-            </a-form-item>
-            <a-space size="large">
-              <a-button
-                size="mini"
-                @click="addQuestionOption(question, optionIndex + 1)"
-              >
-                添加选项
-              </a-button>
-              <a-button
-                size="mini"
-                status="danger"
-                @click="deleteQuestionOption(question, optionIndex as any)"
-              >
-                删除选项
-              </a-button>
-            </a-space>
-          </a-form-item>
-          <!-- 题目选项结尾 -->
-        </div>
+        <!-- draggable 用于题目排序 -->
+        <draggable v-model="questionContent" group="questions" :animation="200">
+          <template #item="{ element, index }">
+            <div :key="index">
+              <a-space size="large">
+                <h3>题目 {{ index + 1 }}</h3>
+                <a-button size="small" @click="addQuestion(index + 1)">
+                  添加题目
+                </a-button>
+                <a-button
+                    size="small"
+                    status="danger"
+                    @click="deleteQuestion(index)"
+                >
+                  删除题目
+                </a-button>
+                <a-button size="small" @click="toggleCollapse(index)">
+                  {{ element.isCollapsed ? '展开' : '收起' }}
+                </a-button>
+              </a-space>
+              <a-form-item :label="`题目 ${index + 1} 标题`">
+                <a-input v-model="element.title" placeholder="请输入标题" />
+              </a-form-item>
+
+              <div v-if="!element.isCollapsed">
+                <a-space size="large">
+                  <h4>题目 {{ index + 1 }} 选项列表</h4>
+                  <a-button
+                      size="small"
+                      @click="addQuestionOption(element, element.options.length)"
+                  >
+                    底部添加选项
+                  </a-button>
+                </a-space>
+                <a-form-item
+                    v-for="(option, optionIndex) in element.options"
+                    :key="optionIndex"
+                    :label="`选项 ${optionIndex + 1}`"
+                    :content-flex="false"
+                    :merge-props="false"
+                >
+                  <a-form-item label="选项 key">
+                    <a-input v-model="option.key" placeholder="请输入选项 key" />
+                  </a-form-item>
+                  <a-form-item label="选项值">
+                    <a-input v-model="option.value" placeholder="请输入选项值" />
+                  </a-form-item>
+                  <a-form-item label="选项结果">
+                    <a-input v-model="option.result" placeholder="请输入选项结果" />
+                  </a-form-item>
+                  <a-form-item label="选项得分">
+                    <a-input-number
+                        v-model="option.score"
+                        placeholder="请输入选项得分"
+                    />
+                  </a-form-item>
+                  <a-space size="large">
+                    <a-button
+                        size="mini"
+                        @click="addQuestionOption(element, optionIndex + 1)"
+                    >
+                      添加选项
+                    </a-button>
+                    <a-button
+                        size="mini"
+                        status="danger"
+                        @click="deleteQuestionOption(element, optionIndex)"
+                    >
+                      删除选项
+                    </a-button>
+                  </a-space>
+                </a-form-item>
+              </div>
+            </div>
+          </template>
+        </draggable>
       </a-form-item>
       <a-form-item>
         <a-button type="primary" html-type="submit" style="width: 120px">
@@ -105,15 +113,12 @@
 
 <script setup lang="ts">
 import { defineProps, ref, watchEffect, withDefaults } from "vue";
-import API from "@/api";
 import { useRouter } from "vue-router";
-import {
-  addQuestionUsingPost,
-  editQuestionUsingPost,
-  listQuestionVoByPageUsingPost,
-} from "@/api/questionController";
+import API from "@/api";
 import message from "@arco-design/web-vue/es/message";
 import AiGenerateQuestionDrawer from "@/views/add/components/AiGenerateQuestionDrawer.vue";
+import draggable from "vuedraggable";
+import {addQuestionUsingPost, editQuestionUsingPost, listQuestionVoByPageUsingPost} from "@/api/questionController";  // 引入 vue3 版本的 draggable
 
 interface Props {
   appId: string;
@@ -131,6 +136,14 @@ const router = useRouter();
 const questionContent = ref<API.QuestionContentDTO[]>([]);
 
 /**
+ * 切换题目是否收起
+ * @param index
+ */
+const toggleCollapse = (index: number) => {
+  questionContent.value[index].isCollapsed = !questionContent.value[index].isCollapsed;
+};
+
+/**
  * 添加题目
  * @param index
  */
@@ -138,6 +151,7 @@ const addQuestion = (index: number) => {
   questionContent.value.splice(index, 0, {
     title: "",
     options: [],
+    isCollapsed: false,  // 默认不收起
   });
 };
 
@@ -170,8 +184,8 @@ const addQuestionOption = (question: API.QuestionContentDTO, index: number) => {
  * @param index
  */
 const deleteQuestionOption = (
-  question: API.QuestionContentDTO,
-  index: number
+    question: API.QuestionContentDTO,
+    index: number
 ) => {
   if (!question.options) {
     question.options = [];

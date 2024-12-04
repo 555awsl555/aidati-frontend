@@ -31,7 +31,7 @@
                 v-if="current === questionContent.length"
                 :loading="submitting"
                 circle
-                :disabled="!currentAnswer"
+                :disabled="!allQuestionAnswered"
                 @click="doSubmit"
             >
               {{ submitting ? "评分中" : "查看结果" }}
@@ -68,7 +68,7 @@ import {
   computed,
   defineProps,
   reactive,
-  ref,
+  ref, watch,
   watchEffect,
   withDefaults,
 } from "vue";
@@ -116,6 +116,35 @@ const currentAnswer = ref<string>();
 const answerList = reactive<string[]>([]);
 // 是否正在提交结果
 const submitting = ref(false);
+// 所有问题都得到回答
+var allQuestionAnswered = false;
+/**
+ * 查看是否所有的问题都得到了回答
+ */
+const Watch = watch(answerList,(newValue,oldValue)=>{
+  if (answerList.length == questionContent.value.length){
+    console.log("length true");
+    console.log(answerList.slice(0,questionContent.value.length));
+    if(judgeQuestionAnswered()){
+      console.log("true");
+      allQuestionAnswered = true;
+    }
+  }
+})
+
+/**
+ * 判断每个题目都答了
+ */
+const judgeQuestionAnswered = () => {
+  answerList.slice(0,questionContent.value.length).forEach(
+      answer=>{
+        if(answer==null||answer==undefined){
+          return false;
+        }
+      }
+  )
+  return true;
+}
 /**
  * 加载数据
  */

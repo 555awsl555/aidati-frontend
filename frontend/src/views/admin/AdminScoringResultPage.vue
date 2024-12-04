@@ -1,54 +1,83 @@
 <template>
   <a-form
-    :model="formSearchParams"
-    :style="{ marginBottom: '20px' }"
-    layout="inline"
-    @submit="doSearch"
+      :model="formSearchParams"
+      :style="{ marginBottom: '20px' }"
+      layout="inline"
+      @submit="doSearch"
   >
-    <a-form-item field="resultName" label="结果名称">
+    <!-- 搜索条件选择框 -->
+    <a-form-item field="searchType" label="搜索条件">
+      <a-select v-model="formSearchParams.searchType" placeholder="请选择搜索条件" style="width: 150px">
+        <a-option value="resultName">结果名称</a-option>
+        <a-option value="resultDesc">结果描述</a-option>
+        <a-option value="appId">应用 id</a-option>
+        <a-option value="userId">用户 id</a-option>
+      </a-select>
+    </a-form-item>
+
+    <!-- 动态渲染细节搜索框 -->
+    <a-form-item v-if="formSearchParams.searchType === 'resultName'" field="resultName" label="结果名称">
       <a-input
-        v-model="formSearchParams.resultName"
-        placeholder="请输入结果名称"
-        allow-clear
+          v-model="formSearchParams.resultName"
+          placeholder="请输入结果名称"
+          allow-clear
       />
     </a-form-item>
-    <a-form-item field="resultDesc" label="结果描述">
+    <a-form-item v-if="formSearchParams.searchType === 'resultDesc'" field="resultDesc" label="结果描述">
       <a-input
-        v-model="formSearchParams.resultDesc"
-        placeholder="请输入结果描述"
-        allow-clear
+          v-model="formSearchParams.resultDesc"
+          placeholder="请输入结果描述"
+          allow-clear
       />
     </a-form-item>
-    <a-form-item field="appId" label="应用 id">
+    <a-form-item v-if="formSearchParams.searchType === 'appId'" field="appId" label="应用 id">
       <a-input
-        v-model="formSearchParams.appId"
-        placeholder="请输入应用 id"
-        allow-clear
+          v-model="formSearchParams.appId"
+          placeholder="请输入应用 id"
+          allow-clear
       />
     </a-form-item>
-    <a-form-item field="userId" label="用户 id">
+    <a-form-item v-if="formSearchParams.searchType === 'userId'" field="userId" label="用户 id">
       <a-input
-        v-model="formSearchParams.userId"
-        placeholder="请输入用户 id"
-        allow-clear
+          v-model="formSearchParams.userId"
+          placeholder="请输入用户 id"
+          allow-clear
       />
     </a-form-item>
+
+    <!-- 搜索按钮 -->
     <a-form-item>
       <a-button type="primary" html-type="submit" style="width: 100px">
         搜索
       </a-button>
     </a-form-item>
   </a-form>
+
+<!--    &lt;!&ndash; 细节搜索条件：额外显示的选项 &ndash;&gt;-->
+    <a-collapse v-if="formSearchParams.searchType" style="width: 100%">
+      <a-collapse-item header="更多搜索条件" key="1">
+        <a-form-item field="resultProp" label="结果属性">
+          <a-input v-model="formSearchParams.resultProp" placeholder="请输入结果属性" allow-clear />
+        </a-form-item>
+        <a-form-item field="resultScoreRange" label="评分范围">
+          <a-input v-model="formSearchParams.resultScoreRange" placeholder="请输入评分范围" allow-clear />
+        </a-form-item>
+      </a-collapse-item>
+    </a-collapse>
+
+
+
+  <!-- 数据表格 -->
   <a-table
-    :columns="columns"
-    :data="dataList"
-    :pagination="{
+      :columns="columns"
+      :data="dataList"
+      :pagination="{
       showTotal: true,
       pageSize: searchParams.pageSize,
       current: searchParams.current,
       total,
     }"
-    @page-change="onPageChange"
+      @page-change="onPageChange"
   >
     <template #resultPicture="{ record }">
       <a-image width="64" :src="record.resultPicture" />
@@ -77,9 +106,12 @@ import API from "@/api";
 import message from "@arco-design/web-vue/es/message";
 import { dayjs } from "@arco-design/web-vue/es/_utils/date";
 
-const formSearchParams = ref<API.ScoringResultQueryRequest>({});
+// 初始化 formSearchParams，给 searchType 设置一个默认值（例如 resultName）
+const formSearchParams = ref<API.ScoringResultQueryRequest>({
+  searchType: 'resultName', // 设置默认搜索条件
+});
 
-// 初始化搜索条件（不应该被修改）
+// 初始化其他参数
 const initSearchParams = {
   current: 1,
   pageSize: 10,
@@ -202,3 +234,4 @@ const columns = [
   },
 ];
 </script>
+
