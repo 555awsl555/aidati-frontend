@@ -1,44 +1,58 @@
 <template>
   <a-form
-    :model="formSearchParams"
-    :style="{ marginBottom: '20px' }"
-    layout="inline"
-    @submit="doSearch"
+      :model="formSearchParams"
+      :style="{ marginBottom: '20px' }"
+      layout="inline"
+      @submit="doSearch"
   >
-    <a-form-item field="resultName" label="结果名称">
-      <a-input
+  <!-- 搜索条件选择框 -->
+  <a-form-item field="searchType" label="搜索条件">
+    <a-select v-model="formSearchParams.searchType" placeholder="请选择搜索条件" style="width: 150px">
+      <a-option value="resultName">结果名称</a-option>
+      <a-option value="resultDesc">结果描述</a-option>
+      <a-option value="appId">应用 id</a-option>
+      <a-option value="userId">用户 id</a-option>
+    </a-select>
+  </a-form-item>
+
+  <!-- 动态渲染细节搜索框 -->
+  <a-form-item v-if="formSearchParams.searchType === 'resultName'" field="resultName" label="结果名称">
+    <a-input
         v-model="formSearchParams.resultName"
         placeholder="请输入结果名称"
         allow-clear
-      />
-    </a-form-item>
-    <a-form-item field="resultDesc" label="结果描述">
-      <a-input
+    />
+  </a-form-item>
+  <a-form-item v-if="formSearchParams.searchType === 'resultDesc'" field="resultDesc" label="结果描述">
+    <a-input
         v-model="formSearchParams.resultDesc"
         placeholder="请输入结果描述"
         allow-clear
-      />
-    </a-form-item>
-    <a-form-item field="appId" label="应用 id">
-      <a-input
+    />
+  </a-form-item>
+  <a-form-item v-if="formSearchParams.searchType === 'appId'" field="appId" label="应用 id">
+    <a-input
         v-model="formSearchParams.appId"
         placeholder="请输入应用 id"
         allow-clear
-      />
-    </a-form-item>
-    <a-form-item field="userId" label="用户 id">
-      <a-input
+    />
+  </a-form-item>
+  <a-form-item v-if="formSearchParams.searchType === 'userId'" field="userId" label="用户 id">
+    <a-input
         v-model="formSearchParams.userId"
         placeholder="请输入用户 id"
         allow-clear
-      />
-    </a-form-item>
-    <a-form-item>
-      <a-button type="primary" html-type="submit" style="width: 100px">
-        搜索
-      </a-button>
-    </a-form-item>
+    />
+  </a-form-item>
+
+  <!-- 搜索按钮 -->
+  <a-form-item>
+    <a-button type="primary" html-type="submit" style="width: 100px">
+      搜索
+    </a-button>
+  </a-form-item>
   </a-form>
+
   <a-table
     :columns="columns"
     :data="dataList"
@@ -84,7 +98,9 @@ import message from "@arco-design/web-vue/es/message";
 import { dayjs } from "@arco-design/web-vue/es/_utils/date";
 import { APP_SCORING_STRATEGY_MAP, APP_TYPE_MAP } from "@/constant/app";
 
-const formSearchParams = ref<API.UserAnswerQueryRequest>({});
+const formSearchParams = ref<API.UserAnswerQueryRequest>({
+  searchType:"resultName",
+});
 
 // 初始化搜索条件（不应该被修改）
 const initSearchParams = {
