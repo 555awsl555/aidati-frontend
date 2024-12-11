@@ -5,6 +5,7 @@ import com.aw.aidati.common.ErrorCode;
 import com.aw.aidati.constant.CommonConstant;
 import com.aw.aidati.exception.ThrowUtils;
 import com.aw.aidati.mapper.QuestionMapper;
+import com.aw.aidati.model.dto.question.QuestionContentDTO;
 import com.aw.aidati.model.dto.question.QuestionQueryRequest;
 import com.aw.aidati.model.entity.App;
 import com.aw.aidati.model.entity.Question;
@@ -25,9 +26,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -138,7 +137,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
      * @return
      */
     @Override
-    public Page<QuestionVO> getQuestionVOPage(Page<Question> questionPage, HttpServletRequest request) {
+    public Page<QuestionVO> getQuestionVOPage(Page<Question> questionPage,int trueNumber,HttpServletRequest request) {
         List<Question> questionList = questionPage.getRecords();
         Page<QuestionVO> questionVOPage = new Page<>(questionPage.getCurrent(), questionPage.getSize(), questionPage.getTotal());
         if (CollUtil.isEmpty(questionList)) {
@@ -148,7 +147,17 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         List<QuestionVO> questionVOList = questionList.stream().map(question -> {
             return QuestionVO.objToVo(question);
         }).collect(Collectors.toList());
-
+        // 重新封装题目，取随机trueNumber个题目
+        int questionSize = questionVOList.get(0).getQuestionContent().size();
+        List<QuestionContentDTO> questionContent = questionVOList.get(0).getQuestionContent();
+        System.out.println("size:"+questionSize);
+        List<QuestionContentDTO> subQuestionList = new ArrayList<>();
+        if (questionSize > trueNumber){
+            Collections.shuffle(questionContent);
+            subQuestionList = questionContent.subList(0, trueNumber);
+        }
+        System.out.println("subSize:"+subQuestionList.size());
+        questionVOList.get(0).setQuestionContent(subQuestionList);
         // 可以根据需要为封装对象补充值，不需要的内容可以删除
         // region 可选
         // 1. 关联查询用户信息
@@ -166,7 +175,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             questionVO.setUser(userService.getUserVO(user));
         });
         // endregion
-
+        System.out.println(questionVOList);
         questionVOPage.setRecords(questionVOList);
         return questionVOPage;
     }

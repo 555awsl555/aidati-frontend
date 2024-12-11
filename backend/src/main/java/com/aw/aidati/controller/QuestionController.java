@@ -35,8 +35,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * 题目接口
@@ -198,6 +200,20 @@ public class QuestionController {
         return ResultUtils.success(questionPage);
     }
 
+    //真实看到的题目
+    private int TRUENUMBER=10;
+
+    /**
+     * 获得真实要布置的题目数量
+     * @param trueNumber
+     * @return
+     */
+    @PostMapping("/setTrueNumber")
+    public BaseResponse<Integer> setTrueNumber(@RequestParam int trueNumber){
+        TRUENUMBER=trueNumber;
+        return ResultUtils.success(TRUENUMBER);
+    }
+
     /**
      * 分页获取题目列表（封装类）
      *
@@ -216,7 +232,7 @@ public class QuestionController {
         Page<Question> questionPage = questionService.page(new Page<>(current, size),
                 questionService.getQueryWrapper(questionQueryRequest));
         // 获取封装类
-        return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
+        return ResultUtils.success(questionService.getQuestionVOPage(questionPage,TRUENUMBER,request));
     }
 
     /**
@@ -241,7 +257,7 @@ public class QuestionController {
         Page<Question> questionPage = questionService.page(new Page<>(current, size),
                 questionService.getQueryWrapper(questionQueryRequest));
         // 获取封装类
-        return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
+        return ResultUtils.success(questionService.getQuestionVOPage(questionPage,TRUENUMBER,request));
     }
 
     /**
