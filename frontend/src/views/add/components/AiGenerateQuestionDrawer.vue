@@ -20,10 +20,18 @@
         </a-form-item>
         <a-form-item field="questionNumber" label="题目数量">
           <a-input-number
-            min="0"
+            min="1"
             max="20"
             v-model="form.questionNumber"
             placeholder="请输入题目数量"
+          />
+        </a-form-item>
+        <a-form-item field="trueNumber" label="布置题数">
+          <a-input-number
+              min="1"
+              :max="form.questionNumber"
+              v-model="trueNumber"
+              placeholder="请输入布置题数"
           />
         </a-form-item>
         <a-form-item field="optionNumber" label="选项数量">
@@ -69,7 +77,7 @@
 <script setup lang="ts">
 import { defineProps, reactive, ref, withDefaults } from "vue";
 import API from "@/api";
-import {aiGenerateQuestionUsingPost, setQuestionScore} from "@/api/questionController";
+import {aiGenerateQuestionUsingPost, setQuestionScore, setTrueQuestionNumber} from "@/api/questionController";
 import message from "@arco-design/web-vue/es/message";
 import {userLogoutUsingPost} from "@/api/userController";
 
@@ -88,12 +96,14 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const form = reactive({
-  optionNumber: 2,
+  optionNumber: 4,
   questionNumber: 10,
 } as API.AiGenerateQuestionRequest);
 
 //每一题的分数设置
 const score = ref(10);
+//要布置的题目数量
+const trueNumber = ref(10);
 
 const visible = ref(false);
 const submitting = ref(false);
@@ -122,6 +132,13 @@ const handleSubmit = async () => {
     console.log("设置分数成功！");
   } else {
     message.error("设置分数失败，" + scoreResult.data.message);
+  }
+  //设置真实题目数
+  const trueNumberResult = await setTrueQuestionNumber(trueNumber.value)
+  if (trueNumberResult.data.code === 0) {
+    console.log("设置要布置的题目数量成功！");
+  } else {
+    message.error("设置要布置的题目数量失败，" + trueNumberResult.data.message);
   }
   submitting.value = true;
   const res = await aiGenerateQuestionUsingPost({
@@ -155,6 +172,13 @@ const handleSSESubmit = async () => {
     console.log("设置分数成功！");
   } else {
     message.error("设置分数失败，" + scoreResult.data.message);
+  }
+  //设置真实题目数
+  const trueNumberResult = await setTrueQuestionNumber(trueNumber.value)
+  if (trueNumberResult.data.code === 0) {
+    console.log("设置要布置的题目数量成功！");
+  } else {
+    message.error("设置要布置的题目数量失败，" + trueNumberResult.data.message);
   }
   sseSubmitting.value = true;
   // 创建 SSE 请求

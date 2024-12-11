@@ -136,13 +136,12 @@ const Watch = watch(answerList,(newValue,oldValue)=>{
  * 判断每个题目都答了
  */
 const judgeQuestionAnswered = () => {
-  answerList.slice(0,questionContent.value.length).forEach(
-      answer=>{
-        if(answer==null||answer==undefined){
-          return false;
-        }
-      }
-  )
+  for(let i=0;i<questionContent.value.length;i++){
+    console.log(i,answerList[i]);
+    if(answerList[i]==null||answerList[i]==undefined){
+      return false;
+    }
+  }
   return true;
 }
 /**

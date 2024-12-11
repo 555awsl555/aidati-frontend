@@ -27,6 +27,15 @@ export async function setQuestionScore(score: number) {
   });
 }
 
+/** 添加要布置的题目数量 */
+export async function setTrueQuestionNumber(trueNumber: number) {
+  return request("/api/question/setTrueNumber?trueNumber=" + trueNumber, {
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
 
 
 /** aiGenerateQuestion POST /api/question/ai_generate */
